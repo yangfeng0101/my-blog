@@ -4,11 +4,12 @@ import type { Theme } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import './style.css'
 import MyLayout from './MyLayout.vue'
+import BlogEditor from './BlogEditor.vue'
 
 export default {
   extends: DefaultTheme,
   Layout: MyLayout,
   enhanceApp({ app, router, siteData }) {
-    // 注册全局组件
+    app.component('BlogEditor', BlogEditor)
   }
 } satisfies Theme
