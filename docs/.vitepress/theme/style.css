@@ -1,52 +1,99 @@
-/* ========== 全局主题变量 ========== */
+/* ========== 主题变量 ========== */
 :root {
-  --vp-c-brand-1: #00f5a0;
-  --vp-c-brand-2: #00d9f5;
-  --vp-c-brand-3: #00f5a0;
-  --vp-button-brand-bg: linear-gradient(135deg, #00f5a0, #00d9f5);
-  --vp-button-brand-hover-bg: linear-gradient(135deg, #00d9f5, #a855f7);
-  --vp-c-text-1: #e8e8e8;
-  --vp-c-text-2: #a0a0a0;
-  --vp-c-text-3: #666666;
-  --vp-c-bg: #0a0a0f;
-  --vp-c-bg-soft: #111118;
-  --vp-c-bg-elv: #16161f;
-  --vp-c-bg-aside: #1a1a24;
-  --vp-c-divider: rgba(255, 255, 255, 0.06);
-  --vp-home-hero-name-color: transparent;
-  --vp-font-family-base: 'Space Grotesk', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* 品牌色（两个主题共用） */
+  --blog-brand-green: #00f5a0;
+  --blog-brand-cyan: #00d9f5;
+  --blog-brand-purple: #a855f7;
+  --blog-brand-pink: #f472b6;
+  --blog-font: 'Space Grotesk', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+/* ========== 亮色主题 ========== */
+:root {
+  --blog-bg: #fafafa;
+  --blog-bg-hero: #ffffff;
+  --blog-text-1: #1a1a2e;
+  --blog-text-2: #555566;
+  --blog-text-3: #999;
+  --blog-card-bg: #ffffff;
+  --blog-card-border: rgba(0, 0, 0, 0.08);
+  --blog-nav-bg: rgba(250, 250, 250, 0.85);
+  --blog-divider: rgba(0, 0, 0, 0.08);
+  --blog-tag-bg: rgba(0, 0, 0, 0.04);
+  --blog-tag-border: rgba(0, 0, 0, 0.08);
+  --blog-code-bg: rgba(0, 245, 160, 0.08);
+  --blog-code-border: rgba(0, 245, 160, 0.15);
+  --blog-glow-opacity: 0.04;
+  --blog-scroll-thumb: rgba(0, 0, 0, 0.12);
+  --blog-selection: rgba(0, 245, 160, 0.15);
+  --blog-hero-gradient: radial-gradient(ellipse 80% 50% at 20% 10%, rgba(0, 245, 160, 0.06) 0%, transparent 60%),
+                        radial-gradient(ellipse 60% 40% at 80% 90%, rgba(168, 85, 247, 0.06) 0%, transparent 60%);
+  --blog-body-gradient: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(0, 245, 160, 0.04) 0%, transparent 60%),
+                        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(168, 85, 247, 0.04) 0%, transparent 60%);
+  --blog-particle-alpha: 0.6;
+}
+
+/* ========== 暗色主题 ========== */
 .dark {
-  --vp-c-bg: #0a0a0f;
-  --vp-c-bg-soft: #111118;
-  --vp-c-bg-elv: #16161f;
+  --blog-bg: #0a0a0f;
+  --blog-bg-hero: #0a0a0f;
+  --blog-text-1: #e8e8e8;
+  --blog-text-2: #a0a0a0;
+  --blog-text-3: #666666;
+  --blog-card-bg: rgba(255, 255, 255, 0.03);
+  --blog-card-border: rgba(255, 255, 255, 0.06);
+  --blog-nav-bg: rgba(10, 10, 15, 0.75);
+  --blog-divider: rgba(255, 255, 255, 0.06);
+  --blog-tag-bg: rgba(255, 255, 255, 0.06);
+  --blog-tag-border: rgba(255, 255, 255, 0.1);
+  --blog-code-bg: rgba(0, 245, 160, 0.08);
+  --blog-code-border: rgba(0, 245, 160, 0.12);
+  --blog-glow-opacity: 0.08;
+  --blog-scroll-thumb: rgba(255, 255, 255, 0.1);
+  --blog-selection: rgba(0, 245, 160, 0.2);
+  --blog-hero-gradient: radial-gradient(ellipse 80% 50% at 20% 20%, rgba(0, 245, 160, 0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse 60% 40% at 70% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(0, 217, 245, 0.05) 0%, transparent 60%);
+  --blog-body-gradient: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(0, 245, 160, 0.03) 0%, transparent 60%),
+                        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(168, 85, 247, 0.03) 0%, transparent 60%);
+  --blog-particle-alpha: 0.5;
+}
+
+/* ========== VitePress 变量同步 ========== */
+:root {
+  --vp-c-brand-1: var(--blog-brand-green);
+  --vp-c-brand-2: var(--blog-brand-cyan);
+  --vp-c-brand-3: var(--blog-brand-green);
+  --vp-button-brand-bg: linear-gradient(135deg, #00f5a0, #00d9f5);
+  --vp-button-brand-hover-bg: linear-gradient(135deg, #00d9f5, #a855f7);
+  --vp-font-family-base: var(--blog-font);
 }
 
 /* ========== 全局背景 ========== */
 body {
-  background: var(--vp-c-bg);
-  background-image: 
-    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(0, 245, 160, 0.03) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(168, 85, 247, 0.03) 0%, transparent 60%);
+  background: var(--blog-bg);
+  background-image: var(--blog-body-gradient);
   background-attachment: fixed;
+  color: var(--blog-text-1);
+  transition: background 0.3s, color 0.3s;
 }
 
-/* ========== 导航栏美化 ========== */
+/* ========== 导航栏 ========== */
 .VPNav {
   backdrop-filter: blur(16px) saturate(180%) !important;
-  background: rgba(10, 10, 15, 0.75) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  background: var(--blog-nav-bg) !important;
+  border-bottom: 1px solid var(--blog-divider) !important;
+  transition: background 0.3s !important;
 }
 
 .VPNavBar .title {
-  font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif !important;
+  font-family: var(--blog-font) !important;
   font-weight: 700 !important;
 }
 
-/* ========== 首页特性区域 ========== */
+/* ========== 首页 ========== */
 .VPHero .name {
-  font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif !important;
+  font-family: var(--blog-font) !important;
 }
 
 .VPFeatures .container {
@@ -54,58 +101,58 @@ body {
 }
 
 .VPFeature {
-  background: rgba(255, 255, 255, 0.02) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  background: var(--blog-card-bg) !important;
+  border: 1px solid var(--blog-card-border) !important;
   border-radius: 14px !important;
   transition: all 0.3s ease !important;
 }
 
 .VPFeature:hover {
-  border-color: rgba(0, 245, 160, 0.2) !important;
+  border-color: rgba(0, 245, 160, 0.3) !important;
   transform: translateY(-3px) !important;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* ========== 文章列表页 ========== */
+/* ========== 侧边栏 ========== */
 .VPDoc .aside {
-  background: var(--vp-c-bg-aside) !important;
+  background: var(--blog-card-bg) !important;
   border-radius: 12px !important;
-  border: 1px solid var(--vp-c-divider) !important;
+  border: 1px solid var(--blog-card-border) !important;
 }
 
 /* ========== 代码块 ========== */
 .vp-code-group .tabs {
-  background: var(--vp-c-bg-soft) !important;
+  background: var(--blog-card-bg) !important;
   border-radius: 12px 12px 0 0 !important;
 }
 
 div[class*='language-'] {
   border-radius: 10px !important;
-  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid var(--blog-card-border) !important;
 }
 
 /* ========== 内联代码 ========== */
 :not(pre) > code {
-  background: rgba(0, 245, 160, 0.08) !important;
-  color: #00f5a0 !important;
-  border: 1px solid rgba(0, 245, 160, 0.12) !important;
+  background: var(--blog-code-bg) !important;
+  color: var(--blog-brand-green) !important;
+  border: 1px solid var(--blog-code-border) !important;
   border-radius: 5px !important;
   padding: 0.15em 0.4em !important;
   font-size: 0.88em !important;
 }
 
-/* ========== 文章内容排版 ========== */
+/* ========== 文章排版 ========== */
 .vp-doc h1 {
-  background: linear-gradient(135deg, #00f5a0, #00d9f5);
+  background: linear-gradient(135deg, var(--blog-brand-green), var(--blog-brand-cyan));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif !important;
+  font-family: var(--blog-font) !important;
 }
 
 .vp-doc h2 {
   border-top: none !important;
   padding-top: 1rem !important;
-  font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif !important;
+  font-family: var(--blog-font) !important;
 }
 
 .vp-doc h2::before {
@@ -113,7 +160,7 @@ div[class*='language-'] {
   display: inline-block;
   width: 4px;
   height: 1.2em;
-  background: linear-gradient(135deg, #00f5a0, #a855f7);
+  background: linear-gradient(135deg, var(--blog-brand-green), var(--blog-brand-purple));
   border-radius: 2px;
   margin-right: 0.6rem;
   vertical-align: middle;
@@ -121,58 +168,48 @@ div[class*='language-'] {
 
 /* ========== 引用块 ========== */
 .vp-doc blockquote {
-  border-left: 3px solid #00f5a0 !important;
-  background: rgba(0, 245, 160, 0.03) !important;
+  border-left: 3px solid var(--blog-brand-green) !important;
+  background: var(--blog-code-bg) !important;
   border-radius: 0 10px 10px 0 !important;
 }
 
 /* ========== 链接 ========== */
 .vp-doc a {
-  color: #00d9f5 !important;
+  color: var(--blog-brand-cyan) !important;
   text-decoration: none !important;
   border-bottom: 1px dashed rgba(0, 217, 245, 0.3) !important;
   transition: all 0.2s !important;
 }
 
 .vp-doc a:hover {
-  color: #00f5a0 !important;
-  border-bottom-color: #00f5a0 !important;
+  color: var(--blog-brand-green) !important;
+  border-bottom-color: var(--blog-brand-green) !important;
 }
 
 /* ========== 表格 ========== */
 .vp-doc table {
   border-radius: 10px !important;
   overflow: hidden !important;
-  border: 1px solid var(--vp-c-divider) !important;
+  border: 1px solid var(--blog-divider) !important;
 }
 
 .vp-doc table th {
-  background: var(--vp-c-bg-soft) !important;
+  background: var(--blog-card-bg) !important;
 }
 
 /* ========== 滚动条 ========== */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 245, 160, 0.3);
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--blog-scroll-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 245, 160, 0.3); }
 
 /* ========== 选中文字 ========== */
 ::selection {
-  background: rgba(0, 245, 160, 0.2);
-  color: #fff;
+  background: var(--blog-selection);
+  color: inherit;
 }
 
-/* ========== 页面过渡动画 ========== */
+/* ========== 页面过渡 ========== */
 .VPContent {
   animation: fadeIn 0.3s ease;
 }
@@ -181,7 +218,7 @@ div[class*='language-'] {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ========== 侧边栏链接 ========== */
+/* ========== 侧边栏 ========== */
 .VPSidebar .is-active {
-  color: #00f5a0 !important;
+  color: var(--blog-brand-green) !important;
 }

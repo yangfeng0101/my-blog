@@ -17,6 +17,14 @@ onMounted(() => {
   resize()
   window.addEventListener('resize', resize)
 
+  function getComputedAlpha() {
+    return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--blog-particle-alpha')) || 0.5
+  }
+
+  function isDark() {
+    return document.documentElement.classList.contains('dark')
+  }
+
   class Particle {
     constructor() { this.reset() }
     reset() {
@@ -25,7 +33,7 @@ onMounted(() => {
       this.vx = (Math.random() - 0.5) * 0.6
       this.vy = (Math.random() - 0.5) * 0.6
       this.r = Math.random() * 2 + 1
-      this.alpha = Math.random() * 0.5 + 0.2
+      this.alpha = Math.random() * 0.4 + 0.2
       const colors = ['#00f5a0', '#00d9f5', '#a855f7', '#f472b6', '#facc15']
       this.color = colors[Math.floor(Math.random() * colors.length)]
     }
@@ -39,7 +47,7 @@ onMounted(() => {
       ctx.beginPath()
       ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2)
       ctx.fillStyle = this.color
-      ctx.globalAlpha = this.alpha
+      ctx.globalAlpha = this.alpha * getComputedAlpha()
       ctx.fill()
     }
   }
@@ -51,7 +59,10 @@ onMounted(() => {
     ctx.clearRect(0, 0, w, h)
     ctx.globalAlpha = 1
 
-    // draw connections
+    const dark = isDark()
+    const connAlpha = dark ? 0.08 : 0.12
+    const connColor = dark ? '#ffffff' : '#333333'
+
     for (let i = 0; i < particles.length; i++) {
       for (let j = i + 1; j < particles.length; j++) {
         const dx = particles[i].x - particles[j].x
@@ -61,8 +72,8 @@ onMounted(() => {
           ctx.beginPath()
           ctx.moveTo(particles[i].x, particles[i].y)
           ctx.lineTo(particles[j].x, particles[j].y)
-          ctx.strokeStyle = '#ffffff'
-          ctx.globalAlpha = 0.08 * (1 - dist / 150)
+          ctx.strokeStyle = connColor
+          ctx.globalAlpha = connAlpha * (1 - dist / 150)
           ctx.stroke()
         }
       }
@@ -99,13 +110,11 @@ onMounted(() => {
         <span class="tag">折腾</span>
       </div>
       <div class="hero-cta">
-        <a href="/posts/" class="cta-btn primary">浏览文章 →</a>
-        <a href="https://github.com" class="cta-btn secondary" target="_blank">GitHub</a>
+        <a href="/my-blog/posts/" class="cta-btn primary">浏览文章 →</a>
+        <a href="https://github.com/yangfeng0101" class="cta-btn secondary" target="_blank">GitHub</a>
       </div>
     </div>
-    <div class="scroll-hint">
-      <span>↓</span>
-    </div>
+    <div class="scroll-hint"><span>↓</span></div>
   </div>
 </template>
 
@@ -117,9 +126,8 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: radial-gradient(ellipse at 30% 20%, rgba(0, 245, 160, 0.08) 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
-              radial-gradient(ellipse at 50% 50%, rgba(0, 217, 245, 0.05) 0%, transparent 60%);
+  background: var(--blog-hero-gradient);
+  transition: background 0.3s;
 }
 .particles-canvas {
   position: absolute;
@@ -154,9 +162,7 @@ onMounted(() => {
   mask-composite: exclude;
   animation: spin 4s linear infinite;
 }
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 .avatar-emoji {
   font-size: 3rem;
   animation: float 3s ease-in-out infinite;
@@ -169,7 +175,7 @@ onMounted(() => {
   font-size: 3.5rem;
   font-weight: 700;
   margin: 0 0 0.8rem;
-  font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+  font-family: var(--blog-font);
 }
 .gradient-text {
   background: linear-gradient(135deg, #00f5a0 0%, #00d9f5 40%, #a855f7 70%, #f472b6 100%);
@@ -184,9 +190,8 @@ onMounted(() => {
 }
 .hero-subtitle {
   font-size: 1.25rem;
-  color: var(--vp-c-text-2);
+  color: var(--blog-text-2);
   margin: 0 0 1.5rem;
-  font-weight: 400;
 }
 .hero-tags {
   display: flex;
@@ -199,9 +204,9 @@ onMounted(() => {
   padding: 0.3rem 0.9rem;
   border-radius: 20px;
   font-size: 0.85rem;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--vp-c-text-2);
+  background: var(--blog-tag-bg);
+  border: 1px solid var(--blog-tag-border);
+  color: var(--blog-text-2);
   backdrop-filter: blur(8px);
   transition: all 0.3s;
 }
@@ -236,9 +241,9 @@ onMounted(() => {
   box-shadow: 0 8px 30px rgba(0, 245, 160, 0.4);
 }
 .cta-btn.secondary {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: var(--vp-c-text-1);
+  background: var(--blog-tag-bg);
+  border: 1px solid var(--blog-tag-border);
+  color: var(--blog-text-1);
 }
 .cta-btn.secondary:hover {
   border-color: rgba(168, 85, 247, 0.5);
@@ -251,7 +256,7 @@ onMounted(() => {
   left: 50%;
   transform: translateX(-50%);
   animation: bounce 2s ease infinite;
-  color: var(--vp-c-text-3);
+  color: var(--blog-text-3);
   font-size: 1.5rem;
 }
 @keyframes bounce {
