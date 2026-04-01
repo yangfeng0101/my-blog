@@ -6,20 +6,23 @@ title: ✏️ 写博客
 # ✏️ 写博客
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const title = ref('')
 const tagsInput = ref('')
 const summary = ref('')
 const content = ref('')
-const generated = ref(false)
-const copied = ref(false)
+const token = ref('')
+const showToken = ref(false)
+const publishing = ref(false)
+const result = ref(null) // { success, message, url }
+
+onMounted(() => {
+  token.value = localStorage.getItem('blog_gh_token') || ''
+})
 
 const slug = computed(() => {
-  return title.value
-    .toLowerCase()
-    .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
-    .replace(/^-|-$/g, '') || 'untitled'
+  return title.value.toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-').replace(/^-|-$/g, '') || 'untitled'
 })
 
 const today = computed(() => {
@@ -27,64 +30,101 @@ const today = computed(() => {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
 })
 
-const tags = computed(() => {
-  return tagsInput.value.split(/[,，、\s]+/).filter(t => t.trim()).map(t => t.trim())
-})
+const tags = computed(() => tagsInput.value.split(/[,，、\s]+/).filter(t => t.trim()))
 
 const fullContent = computed(() => {
   const lines = ['---']
-  lines.push(`title: ${title.value || '无标题'}`)
+  lines.push(`title: ${title.value}`)
   lines.push(`date: ${today.value}`)
   if (summary.value) lines.push(`summary: ${summary.value}`)
   if (tags.value.length) lines.push(`tags: [${tags.value.join(', ')}]`)
   lines.push('---')
   lines.push('')
-  lines.push(`# ${title.value || '无标题'}`)
-  lines.push('')
   lines.push(content.value || '在这里开始写作...')
   return lines.join('\n')
 })
 
-function generate() {
-  generated.value = true
+function saveToken() {
+  localStorage.setItem('blog_gh_token', token.value)
+  showToken.value = false
 }
 
-async function copyContent() {
-  await navigator.clipboard.writeText(fullContent.value)
-  copied.value = true
-  setTimeout(() => copied.value = false, 2000)
-}
+async function publish() {
+  if (!token.value) { showToken.value = true; return }
+  if (!title.value) return
 
-function download() {
-  const blob = new Blob([fullContent.value], { type: 'text/markdown' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `${slug.value}.md`
-  a.click()
-  URL.revokeObjectURL(url)
+  publishing.value = true
+  result.value = null
+
+  try {
+    const content = btoa(unescape(encodeURIComponent(fullContent.value)))
+    const res = await fetch(`https://api.github.com/repos/yangfeng0101/my-blog/contents/docs/posts/${slug.value}.md`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token.value}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: `post: ${title.value}`,
+        content: content,
+      })
+    })
+
+    const data = await res.json()
+
+    if (res.ok) {
+      result.value = {
+        success: true,
+        message: '发布成功！约 1 分钟后上线',
+        url: `https://yangfeng0101.github.io/my-blog/posts/${slug.value}.html`,
+      }
+      // 清空表单
+      title.value = ''
+      tagsInput.value = ''
+      summary.value = ''
+      content.value = ''
+    } else {
+      result.value = {
+        success: false,
+        message: data.message || '发布失败，请检查 Token 权限',
+      }
+    }
+  } catch (e) {
+    result.value = { success: false, message: `网络错误: ${e.message}` }
+  }
+
+  publishing.value = false
 }
 </script>
 
-## 🚀 最快方式（一行命令）
+<div class="new-post-page">
 
-在博客项目目录下运行：
+<!-- Token 设置 -->
+<div v-if="showToken" class="token-modal">
+  <div class="token-card">
+    <h3>🔑 设置 GitHub Token</h3>
+    <p class="token-hint">需要一个有 <code>repo</code> 权限的 Personal Access Token</p>
+    <a href="https://github.com/settings/tokens/new?scopes=repo&description=blog-deploy" target="_blank" class="token-link">👉 去生成 Token</a>
+    <input v-model="token" type="password" placeholder="ghp_xxxxxxxxxxxx" class="form-input" />
+    <div class="form-actions">
+      <button @click="saveToken" class="btn btn-primary" :disabled="!token">💾 保存</button>
+      <button @click="showToken = false" class="btn btn-secondary">取消</button>
+    </div>
+  </div>
+</div>
 
-```bash
-npm run new "文章标题" "标签1,标签2"
-```
+<!-- 结果提示 -->
+<div v-if="result" :class="['result-banner', result.success ? 'success' : 'error']">
+  <span v-if="result.success">✅ {{ result.message }}</span>
+  <span v-else>❌ {{ result.message }}</span>
+  <a v-if="result.success && result.url" :href="result.url" target="_blank" class="result-link">查看文章 →</a>
+  <button @click="result = null" class="result-close">✕</button>
+</div>
 
-自动完成：创建文件 → 打开编辑器 → git commit → git push → GitHub Actions 部署
-
----
-
-## 📝 在线填写
-
-<div class="new-post-form">
-
+<!-- 写文章表单 -->
 <div class="form-group">
   <label>标题</label>
-  <input v-model="title" placeholder="例：Rust 入门指南" class="form-input" />
+  <input v-model="title" placeholder="例：Rust 入门指南" class="form-input" @keydown.ctrl.enter="publish" />
 </div>
 
 <div class="form-group">
@@ -99,37 +139,23 @@ npm run new "文章标题" "标签1,标签2"
 
 <div class="form-group">
   <label>正文</label>
-  <textarea v-model="content" placeholder="Markdown 内容..." class="form-input form-content" rows="10"></textarea>
+  <textarea v-model="content" placeholder="Markdown 内容..." class="form-input form-content" rows="12"></textarea>
 </div>
 
 <div class="form-actions">
-  <button @click="generate" class="btn btn-primary" :disabled="!title">✨ 生成</button>
+  <button @click="publish" class="btn btn-primary btn-publish" :disabled="!title || publishing">
+    <span v-if="publishing" class="spinner"></span>
+    {{ publishing ? '发布中...' : '🚀 一键发布' }}
+  </button>
+  <button v-if="!token" @click="showToken = true" class="btn btn-secondary btn-sm">🔑 设置 Token</button>
 </div>
 
-<div v-if="generated" class="preview-section">
-  <h2>👀 预览</h2>
-
-  <div class="preview-box">
-    <pre>{{ fullContent }}</pre>
-  </div>
-
-  <div class="form-actions">
-    <button @click="copyContent" class="btn btn-secondary">{{ copied ? '✅ 已复制' : '📋 复制' }}</button>
-    <button @click="download" class="btn btn-secondary">⬇️ 下载</button>
-  </div>
-
-  <div class="publish-hint">
-    <p>💡 复制后在博客目录粘贴到 <code>docs/posts/</code>，然后运行：</p>
-    <div class="code-block">
-      <code>git add -A && git commit -m "post: 新文章" && git push</code>
-    </div>
-  </div>
-</div>
+<p class="publish-tip">💡 Ctrl+Enter 快捷发布 | Token 保存在本地浏览器，安全不泄露</p>
 
 </div>
 
 <style scoped>
-.new-post-form { max-width: 800px; }
+.new-post-page { max-width: 800px; position: relative; }
 .form-group { margin-bottom: 1rem; }
 .form-group label { display: block; font-weight: 600; margin-bottom: 0.3rem; color: var(--blog-text-1); }
 .hint { font-weight: 400; font-size: 0.8rem; color: var(--blog-text-3); }
@@ -142,21 +168,49 @@ npm run new "文章标题" "标签1,标签2"
 .form-input:focus { outline: none; border-color: rgba(0, 245, 160, 0.5); box-shadow: 0 0 0 3px rgba(0, 245, 160, 0.1); }
 textarea.form-input { resize: vertical; }
 .form-content { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85rem; line-height: 1.5; }
-.form-actions { display: flex; gap: 0.6rem; margin: 1.2rem 0; flex-wrap: wrap; }
+.form-actions { display: flex; gap: 0.6rem; margin: 1rem 0; flex-wrap: wrap; align-items: center; }
 .btn {
   padding: 0.5rem 1.2rem; border-radius: 10px; font-size: 0.9rem;
   font-weight: 500; cursor: pointer; border: none; transition: all 0.3s; font-family: inherit;
 }
 .btn-primary { background: linear-gradient(135deg, #00f5a0, #00d9f5); color: #0a0a0a; box-shadow: 0 4px 15px rgba(0, 245, 160, 0.3); }
-.btn-primary:hover:not(:disabled) { transform: translateY(-2px); }
+.btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(0, 245, 160, 0.4); }
 .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-secondary { background: var(--blog-tag-bg); border: 1px solid var(--blog-tag-border); color: var(--blog-text-1); }
 .btn-secondary:hover { border-color: rgba(0, 245, 160, 0.4); color: #00f5a0; }
-.preview-section { margin-top: 1.5rem; padding-top: 1.2rem; border-top: 1px solid var(--blog-divider); }
-.preview-box { background: var(--blog-card-bg); border: 1px solid var(--blog-card-border); border-radius: 12px; padding: 1rem; overflow-x: auto; }
-.preview-box pre { margin: 0; white-space: pre-wrap; font-size: 0.8rem; color: var(--blog-text-2); line-height: 1.5; }
-.publish-hint { margin-top: 1rem; padding: 1rem; border-radius: 10px; background: var(--blog-tag-bg); border: 1px solid var(--blog-card-border); }
-.publish-hint p { margin: 0 0 0.5rem; font-size: 0.9rem; color: var(--blog-text-2); }
-.code-block { background: var(--blog-card-bg); padding: 0.5rem 0.8rem; border-radius: 8px; font-size: 0.85rem; }
-.code-block code { color: var(--blog-brand-green); }
+.btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+.btn-publish { padding: 0.7rem 2rem; font-size: 1rem; }
+.publish-tip { font-size: 0.8rem; color: var(--blog-text-3); margin-top: 0.5rem; }
+
+/* 结果提示 */
+.result-banner {
+  padding: 0.8rem 1.2rem; border-radius: 10px; margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;
+}
+.result-banner.success { background: rgba(0, 245, 160, 0.08); border: 1px solid rgba(0, 245, 160, 0.2); color: #00f5a0; }
+.result-banner.error { background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.2); color: #f43f5e; }
+.result-link { color: inherit; text-decoration: underline; font-size: 0.9rem; }
+.result-close { background: none; border: none; color: inherit; cursor: pointer; margin-left: auto; font-size: 1rem; }
+
+/* Token 弹窗 */
+.token-modal {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+}
+.token-card {
+  background: var(--blog-card-bg); border: 1px solid var(--blog-card-border);
+  border-radius: 16px; padding: 2rem; max-width: 480px; width: 90%;
+}
+.token-card h3 { margin: 0 0 0.5rem; color: var(--blog-text-1); }
+.token-hint { font-size: 0.85rem; color: var(--blog-text-2); margin: 0 0 0.8rem; }
+.token-link { display: inline-block; margin-bottom: 1rem; font-size: 0.85rem; color: var(--blog-brand-cyan); }
+
+/* Spinner */
+.spinner {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid transparent; border-top: 2px solid #0a0a0a;
+  border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 0.3rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
